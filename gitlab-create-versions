@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        /** @noinspection PhpIncludeInspection */
+        require $file;
+        break;
+    }
+}
+
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Input\ArrayInput;
+use Ochorocho\GitlabComposerPackagesCommand;
+
+$input = new ArrayInput([
+    'command' => 'gitlab:create-composer-packages',
+]);
+
+$output = new ConsoleOutput();
+
+$application = new \Symfony\Component\Console\Application();
+
+$application->add(new GitlabComposerPackagesCommand());
+$application->run($input, $output);
