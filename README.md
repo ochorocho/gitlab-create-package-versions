@@ -3,8 +3,12 @@
 ## Setup
 
 ```
-git@github.com:ochorocho/gitlab-create-package-versions.git
+git clone git@github.com:ochorocho/gitlab-create-package-versions.git
 composer install
 ```
 
 Create `.env` file and run `./gitlab-create-versions`
+
+Todo:
+* Add `INCLUDE_REGEX`
+* Create versions
