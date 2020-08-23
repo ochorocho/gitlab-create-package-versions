@@ -19,7 +19,7 @@ class GitlabComposerPackagesCommand extends Command {
     /**
      * API Connection
      *
-     * @var object $client
+     * @var Client $client
      */
     protected $client;
 
@@ -88,6 +88,12 @@ class GitlabComposerPackagesCommand extends Command {
         $this->client->authenticate($this->config['GITLAB_TOKEN'], Client::AUTH_HTTP_TOKEN);
     }
 
+    /**
+     * Get all projects containing composer.json
+     *
+     * @return array
+     * @throws \Http\Client\Exception
+     */
     private function getComposerProjects() {
         $pager = new ResultPager($this->client);
         $projects = $pager->fetchAll($this->client->projects(), 'all');
@@ -112,6 +118,12 @@ class GitlabComposerPackagesCommand extends Command {
         return $this->filterEmptyTags($this->excludeFilter($composerProjects));
     }
 
+    /**
+     * Respect exclude regex
+     *
+     * @param array $projects
+     * @return array
+     */
     private function excludeFilter($projects) {
         $regex = array_key_exists('EXLUDE_REGEX', $this->config) ? $this->config['EXLUDE_REGEX'] : '/.*/';
         $filteredProjects = [];
@@ -135,6 +147,12 @@ class GitlabComposerPackagesCommand extends Command {
         }
     }
 
+    /**
+     * Get rid of all projects without any tags and print info about project and its tags
+     *
+     * @param $projects
+     * @return array
+     */
     private function filterEmptyTags($projects) {
         $this->output->writeln('');
         $projectsWithTags = [];
@@ -153,10 +171,14 @@ class GitlabComposerPackagesCommand extends Command {
         return $projectsWithTags;
     }
 
+    /**
+     * Get all tags of a project
+     *
+     * @param $project
+     * @return mixed
+     */
     private function getTags($project) {
-        $tags = $this->client->tags()->all($project['id']);
-
-        return $tags;
+        return $this->client->tags()->all($project['id']);
     }
 
     private function createVersion($project) {
