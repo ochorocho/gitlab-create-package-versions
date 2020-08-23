@@ -76,7 +76,7 @@ class GitlabComposerPackagesCommand extends Command {
         }
 
         foreach($projects as $project) {
-            $this->output->writeln($project['id'] . ' - ' . $project['path_with_namespace'] . ' --- ' . implode(', ', array_column($project['tags'], 'name', 'id')));
+            $this->createVersion($project);
         }
 
         return Command::SUCCESS;
@@ -157,5 +157,10 @@ class GitlabComposerPackagesCommand extends Command {
         $tags = $this->client->tags()->all($project['id']);
 
         return $tags;
+    }
+
+    private function createVersion($project) {
+        // TODO: Actual API call to create a package
+        $this->output->writeln($project['id'] . ' - ' . $project['path_with_namespace'] . ' --- ' . implode(', ', array_column($project['tags'], 'name', 'id')));
     }
 }
