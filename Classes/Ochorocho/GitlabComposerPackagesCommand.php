@@ -8,18 +8,11 @@ use Gitlab\Client;
 use Gitlab\Api\RepositoryFiles;
 use Gitlab\Exception\RuntimeException;
 use Gitlab\ResultPager;
-use Http\Discovery\Exception\NotFoundException;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableCell;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 
 class GitlabComposerPackagesCommand extends Command {
 
@@ -82,7 +75,9 @@ class GitlabComposerPackagesCommand extends Command {
             return Command::SUCCESS;
         }
 
-        echo "######";
+        foreach($projects as $project) {
+            $this->output->writeln($project['id'] . ' - ' . $project['path_with_namespace'] . ' --- ' . implode(', ', array_column($project['tags'], 'name', 'id')));
+        }
 
         return Command::SUCCESS;
     }
@@ -150,10 +145,12 @@ class GitlabComposerPackagesCommand extends Command {
             if(!empty($tags)) {
                 $this->output->writeln('<info>' . $project['path_with_namespace'] . '</info>');
                 $this->output->writeln(implode(', ', array_column($tags, 'name', 'id')));
-
+                $project['tags'] = $tags;
                 $projectsWithTags[] = $project;
             }
         }
+
+        return $projectsWithTags;
     }
 
     private function getTags($project) {
