@@ -197,7 +197,7 @@ class GitlabComposerPackagesCommand extends Command {
             if($request->getStatusCode() === 201) {
                 $this->output->writeln('Created Package ' . $project['path_with_namespace'] . ':' . $tag);
             } else {
-                $this->output->writeln($project['path_with_namespace'] .' ' . $request->getStatusCode());
+                $this->output->writeln($project['path_with_namespace'] . ' ' . $request->getStatusCode());
             }
         }
     }

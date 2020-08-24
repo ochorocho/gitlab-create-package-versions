@@ -8,7 +8,3 @@ composer install
 ```
 
 Create `.env` file and run `./gitlab-create-versions`
-
-Todo:
-* Create versions
-* Create CI File?
