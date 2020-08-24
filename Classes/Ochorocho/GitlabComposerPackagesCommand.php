@@ -114,6 +114,7 @@ class GitlabComposerPackagesCommand extends Command {
             }
         }
         $progressBar->finish();
+        $this->output->writeln('');
 
         return $this->filterEmptyTags($this->excludeFilter($composerProjects));
     }
@@ -129,7 +130,10 @@ class GitlabComposerPackagesCommand extends Command {
         $filteredProjects = [];
 
         foreach ($projects as $project) {
-            preg_match($regex, $project['path_with_namespace'], $matches);
+            if(@preg_match($regex, $project['path_with_namespace'], $matches) === false) {
+                $this->output->writeln('<error>Invalid Regular Expression: ' . $this->config['INCLUDE_ONLY_REGEX'] . '</error>');
+                exit();
+            }
 
             if(!empty($project['path_with_namespace']) && !empty($matches)) {
                 $filteredProjects[] = $project;
@@ -184,7 +188,23 @@ class GitlabComposerPackagesCommand extends Command {
     }
 
     private function createVersion($project) {
-        // TODO: Actual API call to create a package
-        $this->output->writeln($project['id'] . ' - ' . $project['path_with_namespace'] . ' --- ' . implode(', ', array_column($project['tags'], 'name', 'id')));
+        $this->ensurePackagesEnabled($project);
+        $client = $this->client->getHttpClient();
+
+        foreach (array_column($project['tags'], 'name', 'id') as $tag) {
+            $request = $client->post('api/v4/projects/' . $project['id'] . '/packages/composer?tag=' . $tag);
+
+            if($request->getStatusCode() === 201) {
+                $this->output->writeln('Created Package' . $project['path_with_namespace'] . ':' . $tag);
+            } else {
+                $this->output->writeln($project['path_with_namespace'] .' ' . $request->getStatusCode());
+            }
+        }
+    }
+
+    private function ensurePackagesEnabled($project) : void {
+        if($project['packages_enabled'] !== true) {
+            $this->client->projects()->update($project['id'], ['packages_enabled' => true]);
+        }
     }
 }
