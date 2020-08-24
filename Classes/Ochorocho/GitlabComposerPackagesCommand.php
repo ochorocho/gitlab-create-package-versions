@@ -53,11 +53,6 @@ class GitlabComposerPackagesCommand extends Command {
 
     protected static $defaultName = 'gitlab:create-composer-packages';
 
-    protected function configure()
-    {
-
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->output = $output;
@@ -82,6 +77,11 @@ class GitlabComposerPackagesCommand extends Command {
         return Command::SUCCESS;
     }
 
+    /**
+     * Connect to Gitlab API
+     *
+     * @return void
+     */
     function connectToGitlab() {
         $this->client = new Client();
         $this->client->setUrl($this->config['GITLAB_URL']);
@@ -91,7 +91,7 @@ class GitlabComposerPackagesCommand extends Command {
     /**
      * Get all projects containing composer.json
      *
-     * @return array
+     * @return array<Array>
      * @throws \Http\Client\Exception
      */
     private function getComposerProjects() {
@@ -122,10 +122,10 @@ class GitlabComposerPackagesCommand extends Command {
     /**
      * Respect exclude regex
      *
-     * @param array $projects
-     * @return array
+     * @param array<Array> $projects
+     * @return array<Array>
      */
-    private function excludeFilter($projects) {
+    private function excludeFilter(array $projects) {
         $regex = array_key_exists('INCLUDE_ONLY_REGEX', $this->config) ? $this->config['INCLUDE_ONLY_REGEX'] : '/.*/';
         $filteredProjects = [];
 
@@ -195,13 +195,18 @@ class GitlabComposerPackagesCommand extends Command {
             $request = $client->post('api/v4/projects/' . $project['id'] . '/packages/composer?tag=' . $tag);
 
             if($request->getStatusCode() === 201) {
-                $this->output->writeln('Created Package' . $project['path_with_namespace'] . ':' . $tag);
+                $this->output->writeln('Created Package ' . $project['path_with_namespace'] . ':' . $tag);
             } else {
                 $this->output->writeln($project['path_with_namespace'] .' ' . $request->getStatusCode());
             }
         }
     }
 
+    /**
+     * Make sure Package feature is enabled
+     *
+     * @param $project
+     */
     private function ensurePackagesEnabled($project) : void {
         if($project['packages_enabled'] !== true) {
             $this->client->projects()->update($project['id'], ['packages_enabled' => true]);
