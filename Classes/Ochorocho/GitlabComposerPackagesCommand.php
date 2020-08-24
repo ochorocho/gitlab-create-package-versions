@@ -125,11 +125,13 @@ class GitlabComposerPackagesCommand extends Command {
      * @return array
      */
     private function excludeFilter($projects) {
-        $regex = array_key_exists('EXLUDE_REGEX', $this->config) ? $this->config['EXLUDE_REGEX'] : '/.*/';
+        $regex = array_key_exists('INCLUDE_ONLY_REGEX', $this->config) ? $this->config['INCLUDE_ONLY_REGEX'] : '/.*/';
         $filteredProjects = [];
 
         foreach ($projects as $project) {
-            if(!empty($project['path_with_namespace']) && preg_match($regex, $project['path_with_namespace'])) {
+            preg_match($regex, $project['path_with_namespace'], $matches);
+
+            if(!empty($project['path_with_namespace']) && !empty($matches)) {
                 $filteredProjects[] = $project;
             }
         }

@@ -10,5 +10,5 @@ composer install
 Create `.env` file and run `./gitlab-create-versions`
 
 Todo:
-* Add `INCLUDE_REGEX`
 * Create versions
+* Create CI File?
