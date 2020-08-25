@@ -15,6 +15,7 @@ use Ochorocho\GitlabComposerPackagesCommand;
 
 $input = new ArrayInput([
     'command' => 'gitlab:create-composer-packages',
+    '-vvv' => '',
 ]);
 
 $output = new ConsoleOutput();

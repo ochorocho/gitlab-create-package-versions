@@ -89,7 +89,7 @@ class GitlabComposerPackagesCommand extends Command {
     }
 
     /**
-     * Get all projects containing composer.json
+     * Get all projects containing composer.json in master
      *
      * @return array<Array>
      * @throws \Http\Client\Exception
@@ -135,7 +135,7 @@ class GitlabComposerPackagesCommand extends Command {
                 exit();
             }
 
-            if(!empty($project['path_with_namespace']) && !empty($matches)) {
+            if(!empty($project['path_with_namespace']) && $project['archived'] !== true && !empty($matches)) {
                 $filteredProjects[] = $project;
             }
         }
@@ -192,13 +192,25 @@ class GitlabComposerPackagesCommand extends Command {
         $client = $this->client->getHttpClient();
 
         foreach (array_column($project['tags'], 'name', 'id') as $tag) {
-            $request = $client->post('api/v4/projects/' . $project['id'] . '/packages/composer?tag=' . $tag);
+            try {
+                $this->files->getFile($project['id'], 'composer.json', $tag);
+            } catch (RuntimeException $exception) {
+                $this->output->writeln($project['path_with_namespace'] . ':' . $tag . ' : Could not create version, composer.json missing');
+                return;
+            }
+
+            try {
+                $request = $client->post('api/v4/projects/' . $project['id'] . '/packages/composer?tag=' . $tag);
+            } catch (RuntimeException $e) {
+                $this->output->writeln($e->getMessage());
+            }
 
             if($request->getStatusCode() === 201) {
                 $this->output->writeln('Created Package ' . $project['path_with_namespace'] . ':' . $tag);
             } else {
                 $this->output->writeln($project['path_with_namespace'] . ' ' . $request->getStatusCode());
             }
+
         }
     }
 
