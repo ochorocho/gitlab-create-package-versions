@@ -1,5 +1,7 @@
 # Create composer packages for your gitlab instance
 
+Please use: https://gitlab.com/ochorocho/gitlab-create-package-versions
+
 ## Setup
 
 ```
